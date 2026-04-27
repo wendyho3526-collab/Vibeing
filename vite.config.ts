@@ -6,8 +6,8 @@ import {defineConfig, loadEnv} from 'vite';
 export default defineConfig(({mode}) => {
   const env = loadEnv(mode, '.', '');
   return {
-    base: './Vibeing專案', // Vibeing專案
-    plugins: [react(), tailwindcss()],
+    base: './Vibeing, // Vibeing專案
+    plugins: [react(), tailwindcss()],V
     resolve: {
       alias: {
         '@': path.resolve(__dirname, '.'),
