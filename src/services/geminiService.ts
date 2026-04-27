@@ -1,39 +1,27 @@
-import { GoogleGenerativeAI } from "@google/genai";
-
 /**
  * Gemini API 服務
- * 用於處理智慧分組建議或其他 AI 功能
+ * 現在改為透過後端伺服器 (server.ts) 進行呼叫
+ * 這樣 API Key 就不會洩漏到前端瀏覽器
  */
 
-// 懶載入客戶端，避免啟動時缺少 API KEY 報錯
-let genAI: GoogleGenerativeAI | null = null;
-
-const getGenAI = () => {
-  const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey) {
-    throw new Error("找不到 GEMINI_API_KEY，請在 Secrets 中設定。");
-  }
-  if (!genAI) {
-    genAI = new GoogleGenerativeAI(apiKey);
-  }
-  return genAI;
-};
-
-/**
- * 範例功能：獲取分組名稱建議
- */
 export async function getGroupNameSuggestions(count: number) {
   try {
-    const ai = getGenAI();
-    const model = ai.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const response = await fetch("/api/ai/suggestions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ count }),
+    });
 
-    const prompt = `請為 ${count} 個小組提供有創意且簡短的中文隊名（例如：破風手、領航者）。僅返回隊名，用逗號分隔。`;
-    
-    const result = await model.generateContent(prompt);
-    const response = await result.response;
-    return response.text().split(',').map(s => s.trim());
+    if (!response.ok) {
+      throw new Error("API 請求失敗");
+    }
+
+    const data = await response.json();
+    return data.suggestions || [];
   } catch (error) {
-    console.error("Gemini API Error:", error);
+    console.error("呼叫 AI 服務時發生錯誤:", error);
     return [];
   }
 }
